@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block content %}
+
+  <meta charset="UTF-8">
+  <title>SkyCast AI — Climate Intelligence Platform</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+
+<body>
+
+<header class="hero">
+  <h1>🌍 SkyCast AI</h1>
+  <p>India’s Intelligent Climate & Weather Analytics Platform</p>
+
+  <div class="search-box">
+    <input id="place" placeholder="Search any city in India">
+    <button onclick="searchPlace()">Get Weather Insights</button>
+  </div>
+</header>
+
+<!-- KPI CARDS -->
+<section class="kpi-section" id="kpis"></section>
+
+<!-- DASHBOARD -->
+<section class="grid">
+
+  <div class="card">
+    <h3>📍 Location Map</h3>
+    <div id="map"></div>
+  </div>
+
+  <div class="card">
+    <h3>📈 7-Day Temperature Forecast</h3>
+    <canvas id="tempChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>🌧 Rain Probability Forecast</h3>
+    <canvas id="rainChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>🌅 Sun Cycle</h3>
+    <div id="sun"></div>
+  </div>
+
+  <div class="card">
+    <h3>🌫 Air Quality Index</h3>
+    <div id="aqi"></div>
+  </div>
+
+  <div class="card">
+    <h3>⚠ Extreme Weather Alerts</h3>
+    <div id="alerts"></div>
+  </div>
+
+</section>
+
+<footer>
+  <p>Powered by AI • Climate Intelligence</p>
+  <p>SkyCast AI © 2026</p>
+</footer>
+
+<script>
+let map = L.map('map').setView([22.57, 88.36], 5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+let marker;
+let tempChart, rainChart;
+
+function searchPlace() {
+  let place = document.getElementById("place").value;
+
+  fetch(`/search?place=${place}`)
+    .then(res => res.json())
+    .then(data => {
+
+      if (data.error) {
+        alert("Unable to fetch weather data");
+        return;
+      }
+
+      // KPIs
+      document.getElementById("kpis").innerHTML = `
+        <div class="kpi temp">🌡 ${data.current.temp}°C <span>Temperature</span></div>
+        <div class="kpi hum">💧 ${data.current.humidity}% <span>Humidity</span></div>
+        <div class="kpi wind">🌬 ${data.current.windspeed} km/h <span>Wind</span></div>
+        <div class="kpi rain">🌧 ${data.current.rain_chance}% <span>Rain Chance</span></div>
+        <div class="kpi pres">📊 ${data.current.pressure} mb <span>Pressure</span></div>
+      `;
+
+      // Map
+      map.setView([data.lat, data.lon], 10);
+      if (marker) map.removeLayer(marker);
+      marker = L.marker([data.lat, data.lon]).addTo(map);
+
+      // Sun Cycle
+      document.getElementById("sun").innerHTML = `
+        🌅 Sunrise: <b>${data.current.sunrise}</b><br>
+        🌇 Sunset: <b>${data.current.sunset}</b>
+      `;
+
+      // AQI
+      document.getElementById("aqi").innerHTML = `
+        Air Quality Index: <b>${data.aqi}</b>
+      `;
+
+      // Alerts
+      document.getElementById("alerts").innerHTML =
+        data.alerts.length > 0 ? data.alerts.join("<br>") : "No extreme alerts today";
+
+      // Charts
+      renderTempChart(data.forecast);
+      renderRainChart(data.forecast);
+    });
+}
+
+
+function renderTempChart(data) {
+  if (tempChart) tempChart.destroy();
+
+  tempChart = new Chart(document.getElementById("tempChart"), {
+    type: "line",
+    data: {
+      labels: data.map(d => d.day),
+      datasets: [{
+        label: "Temperature °C",
+        data: data.map(d => d.temp),
+        borderColor: "#00e5ff",
+        backgroundColor: "rgba(0,229,255,0.2)",
+        tension: 0.4
+      }]
+    }
+  });
+}
+
+
+function renderRainChart(data) {
+  if (rainChart) rainChart.destroy();
+
+  rainChart = new Chart(document.getElementById("rainChart"), {
+    type: "bar",
+    data: {
+      labels: data.map(d => d.day),
+      datasets: [{
+        label: "Rain Probability %",
+        data: data.map(d => d.rain),
+        backgroundColor: "#00c853"
+      }]
+    }
+  });
+}
+</script>
+
+{% endblock %}
+

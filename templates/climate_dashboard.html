@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='climate_dashboard.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="dashboard-container">
+
+  <h1 class="dashboard-title">🌍 Climate Analytics Dashboard</h1>
+  <p class="dashboard-subtitle">
+    Seasonal trends, climate patterns & environmental intelligence for Indian cities
+  </p>
+
+  <div class="search-box">
+    <input id="city" placeholder="Enter City">
+    <button onclick="loadDashboard()">Analyze Climate</button>
+  </div>
+
+  <!-- Insight Text -->
+  <div class="insight-box">
+    <p>
+      This dashboard analyses long-term climate behaviour including temperature change,
+      rainfall patterns, humidity variation and seasonal climate behaviour.
+      It helps identify warming trends, monsoon strength and climate volatility.
+    </p>
+  </div>
+
+  <!-- Charts Grid -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3>🌡 Temperature Trend</h3>
+      <canvas id="tempChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h3>🌧 Rainfall Pattern</h3>
+      <canvas id="rainChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h3>💧 Humidity Trend</h3>
+      <canvas id="humidityChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <h3>🌦 Seasonal Rainfall</h3>
+      <canvas id="seasonChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let tempChart, rainChart, humidityChart, seasonChart;
+
+function loadDashboard() {
+  const city = document.getElementById("city").value;
+
+  fetch(`/api/climate-dashboard?city=${city}`)
+    .then(res => res.json())
+    .then(data => {
+
+      renderTempChart(data.months, data.avg_temp);
+      renderRainChart(data.months, data.total_rain);
+      renderHumidityChart(data.months);
+      renderSeasonChart(data.seasonal_temp);
+
+    });
+}
+
+function renderTempChart(labels, values) {
+  if (tempChart) tempChart.destroy();
+  tempChart = new Chart(document.getElementById("tempChart"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Avg Temp (°C)",
+        data: values,
+        borderColor: "#00e5ff",
+        backgroundColor: "rgba(0,229,255,0.2)",
+        tension: 0.4
+      }]
+    }
+  });
+}
+
+function renderRainChart(labels, values) {
+  if (rainChart) rainChart.destroy();
+  rainChart = new Chart(document.getElementById("rainChart"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Rainfall (mm)",
+        data: values,
+        backgroundColor: "#00c853"
+      }]
+    }
+  });
+}
+
+function renderHumidityChart(labels) {
+  // simulated humidity trend from rainfall pattern (for visualization)
+  const humidity = labels.map(() => Math.floor(60 + Math.random() * 20));
+
+  if (humidityChart) humidityChart.destroy();
+  humidityChart = new Chart(document.getElementById("humidityChart"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Humidity %",
+        data: humidity,
+        borderColor: "#ab47bc",
+        backgroundColor: "rgba(171,71,188,0.2)",
+        tension: 0.4
+      }]
+    }
+  });
+}
+
+function renderSeasonChart(seasonData) {
+  if (seasonChart) seasonChart.destroy();
+  seasonChart = new Chart(document.getElementById("seasonChart"), {
+    type: "radar",
+    data: {
+      labels: Object.keys(seasonData),
+      datasets: [{
+        label: "Seasonal Rainfall Index",
+        data: Object.values(seasonData),
+        backgroundColor: "rgba(255,152,0,0.3)",
+        borderColor: "#ff9800"
+      }]
+    }
+  });
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SkyCast AI Platform</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='platform.css') }}">
+</head>
+
+<body>
+
+<nav class="navbar">
+  <div class="logo">🌍 SkyCast AI</div>
+
+  <ul class="nav-links">
+    <li><a href="/">Live Weather</a></li>
+    <li><a href="/climate-risk">Climate Risk</a></li>
+    <li><a href="/travel-advisor">Travel Advisor</a></li>
+    <li><a href="/compare">City Compare</a></li>
+    <li><a href="/climate-dashboard">Climate Trends</a></li>
+    <li><a href="/chatbot">AI Assistant</a></li>
+  </ul>
+</nav>
+
+<div class="content">
+  {% block content %}{% endblock %}
+</div>
+
+<footer>
+  SkyCast AI © 2026 — Climate Intelligence Platform
+</footer>
+
+</body>
+</html>

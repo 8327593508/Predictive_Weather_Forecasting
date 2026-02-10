@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='chatbot.css') }}">
+
+<div class="chatbot-container">
+  <h1>🤖 SkyCast AI Weather Chatbot</h1>
+  <p class="subtitle">Ask anything about weather, pollution, climate risk & travel safety</p>
+
+  <div class="chat-window" id="chatWindow">
+    <div class="bot-message">Hello 👋 I'm SkyCast AI. Ask me about weather, rain, pollution or climate risk.</div>
+  </div>
+
+  <div class="chat-input-box">
+    <input id="userMessage" placeholder="Type your question here..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+function sendMessage() {
+  const input = document.getElementById("userMessage");
+  const message = input.value.trim();
+  if (!message) return;
+
+  const chatWindow = document.getElementById("chatWindow");
+
+  // Add user message
+  chatWindow.innerHTML += `<div class="user-message">${message}</div>`;
+  input.value = "";
+
+  fetch("/api/chatbot", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: message })
+  })
+  .then(res => res.json())
+  .then(data => {
+    chatWindow.innerHTML += `<div class="bot-message">${data.reply}</div>`;
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  });
+}
+</script>
+
+{% endblock %}
+

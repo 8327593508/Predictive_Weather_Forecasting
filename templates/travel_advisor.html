@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='travel_advisor.css') }}">
+
+<div class="travel-container">
+
+  <h1>✈ Smart Travel Weather Advisor</h1>
+  <p class="subtitle">
+    AI-powered travel safety analysis using weather, pollution & climate risk intelligence
+  </p>
+
+  <!-- Input Section -->
+  <div class="travel-box">
+    <input id="fromCity" placeholder="From City">
+    <input id="toCity" placeholder="To City">
+
+    <!-- Calendar -->
+    <input id="travelDate" type="date">
+
+    <button onclick="checkTravel()">Analyze Travel Risk</button>
+  </div>
+
+  <!-- Result Section -->
+  <div class="result-card" id="resultCard" style="display:none;">
+    <h2>Travel Risk Score</h2>
+
+    <div id="riskScore" class="risk-score">0</div>
+    <div id="riskStatus" class="risk-status"></div>
+    <p id="recommendation"></p>
+
+    <div class="weather-info">
+      <h3>Destination Weather Forecast</h3>
+      <p>🌡 Temperature: <span id="temp"></span>°C</p>
+      <p>🌧 Rain Chance: <span id="rain"></span>%</p>
+      <p>🌬 Wind Speed: <span id="wind"></span> km/h</p>
+      <p>🌫 AQI: <span id="aqi"></span></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function checkTravel() {
+  const from = document.getElementById("fromCity").value;
+  const to = document.getElementById("toCity").value;
+  const date = document.getElementById("travelDate").value;
+
+  if (!from || !to || !date) {
+    alert("Please enter source, destination and travel date");
+    return;
+  }
+
+  fetch(`/api/travel-advisor?from=${from}&to=${to}&date=${date}`)
+    .then(res => res.json())
+    .then(data => {
+
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+
+      document.getElementById("resultCard").style.display = "block";
+
+      const risk = data.travel_risk;
+
+      document.getElementById("riskScore").innerText = risk.score;
+      document.getElementById("riskStatus").innerText = risk.status;
+      document.getElementById("recommendation").innerText = risk.recommendation;
+
+      document.getElementById("temp").innerText = data.destination_weather.temp;
+      document.getElementById("rain").innerText = data.destination_weather.rain_chance;
+      document.getElementById("wind").innerText = data.destination_weather.windspeed;
+      document.getElementById("aqi").innerText = data.aqi;
+
+      document.getElementById("riskStatus").style.color = risk.color;
+    });
+}
+</script>
+
+{% endblock %}

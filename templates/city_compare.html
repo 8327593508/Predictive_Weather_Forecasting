@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='city_compare.css') }}">
+
+<div class="compare-container">
+  <h1>🏙 City Climate Comparison</h1>
+  <p>Compare real-time climate, pollution & risk intelligence</p>
+
+  <div class="compare-box">
+    <input id="city1" placeholder="First City">
+    <input id="city2" placeholder="Second City">
+    <button onclick="compareCities()">Compare</button>
+  </div>
+
+  <table id="compareTable" class="compare-table" style="display:none;">
+    <thead>
+      <tr>
+        <th>Metric</th>
+        <th id="c1"></th>
+        <th id="c2"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>🌡 Temperature (°C)</td><td id="t1"></td><td id="t2"></td></tr>
+      <tr><td>🌧 Rain Chance (%)</td><td id="r1"></td><td id="r2"></td></tr>
+      <tr><td>🌬 Wind (km/h)</td><td id="w1"></td><td id="w2"></td></tr>
+      <tr><td>🌫 AQI</td><td id="a1"></td><td id="a2"></td></tr>
+      <tr><td>⚠ Climate Risk Score</td><td id="cr1"></td><td id="cr2"></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+function compareCities() {
+  const city1 = document.getElementById("city1").value;
+  const city2 = document.getElementById("city2").value;
+
+  fetch(`/api/compare-cities?city1=${city1}&city2=${city2}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("compareTable").style.display = "table";
+
+      document.getElementById("c1").innerText = data.city1.city;
+      document.getElementById("c2").innerText = data.city2.city;
+
+      document.getElementById("t1").innerText = data.city1.temp;
+      document.getElementById("t2").innerText = data.city2.temp;
+
+      document.getElementById("r1").innerText = data.city1.rain;
+      document.getElementById("r2").innerText = data.city2.rain;
+
+      document.getElementById("w1").innerText = data.city1.wind;
+      document.getElementById("w2").innerText = data.city2.wind;
+
+      document.getElementById("a1").innerText = data.city1.aqi;
+      document.getElementById("a2").innerText = data.city2.aqi;
+
+      document.getElementById("cr1").innerText = data.city1.risk + " / 10";
+      document.getElementById("cr2").innerText = data.city2.risk + " / 10";
+    });
+}
+</script>
+
+{% endblock %}
+

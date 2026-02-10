@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='climate_risk.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="risk-container">
+
+  <h1>🌍 Climate Risk Intelligence Dashboard</h1>
+  <p class="subtitle">Assess climate vulnerability of any Indian city in real time</p>
+
+  <div class="search-box">
+    <input id="city" placeholder="Enter city name">
+    <button onclick="getRisk()">Analyze Climate Risk</button>
+  </div>
+
+  <div class="score-card">
+    <h2>Total Climate Risk Score</h2>
+    <div id="totalRisk" class="risk-score">--</div>
+    <span>Risk Level (0 = Safe, 10 = Extreme)</span>
+  </div>
+
+  <div class="risk-grid">
+    <div class="risk-box heat">🔥 Heatwave Risk: <span id="heat"></span></div>
+    <div class="risk-box flood">🌊 Flood Risk: <span id="flood"></span></div>
+    <div class="risk-box pollution">🌫 Pollution Risk: <span id="pollution"></span></div>
+    <div class="risk-box cyclone">🌀 Cyclone Risk: <span id="cyclone"></span></div>
+    <div class="risk-box rain">🌧 Rainfall Variability: <span id="rainfall"></span></div>
+  </div>
+
+  <canvas id="riskChart"></canvas>
+
+</div>
+
+<script>
+let chart;
+
+function getRisk() {
+  const city = document.getElementById("city").value;
+
+  fetch(`/api/climate-risk?city=${city}`)
+    .then(res => res.json())
+    .then(data => {
+
+      document.getElementById("totalRisk").innerText = data.total;
+      document.getElementById("heat").innerText = data.heatwave;
+      document.getElementById("flood").innerText = data.flood;
+      document.getElementById("pollution").innerText = data.pollution;
+      document.getElementById("cyclone").innerText = data.cyclone;
+      document.getElementById("rainfall").innerText = data.rainfall;
+
+      renderChart(data);
+    });
+}
+
+function renderChart(data) {
+  const ctx = document.getElementById("riskChart");
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: "radar",
+    data: {
+      labels: ["Heatwave", "Flood", "Pollution", "Cyclone", "Rainfall"],
+      datasets: [{
+        label: "Climate Risk Factors",
+        data: [
+          data.heatwave,
+          data.flood,
+          data.pollution,
+          data.cyclone,
+          data.rainfall
+        ],
+        backgroundColor: "rgba(255,99,132,0.3)",
+        borderColor: "#ff1744",
+        borderWidth: 2
+      }]
+    }
+  });
+}
+</script>
+
+{% endblock %}
+
