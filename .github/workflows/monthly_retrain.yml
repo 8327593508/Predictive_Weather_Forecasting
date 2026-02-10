@@ -1,0 +1,32 @@
+name: Monthly Model Retraining
+
+on:
+  schedule:
+    - cron: "0 3 1 * *"   # 1st of every month
+  workflow_dispatch:
+
+jobs:
+  retrain_model:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Prepare dataset
+        run: |
+          python ml/prepare_dataset.py
+
+      - name: Train model
+        run: |
+          python ml/train_model.py
