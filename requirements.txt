@@ -1,0 +1,11 @@
+flask
+requests
+pandas
+sqlalchemy
+psycopg2-binary
+scikit-learn
+joblib
+python-dotenv
+xgboost
+meteostat
+apache-airflow
