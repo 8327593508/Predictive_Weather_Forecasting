@@ -10,7 +10,8 @@ SkyCast AI is an end-to-end Machine Learning powered weather forecasting web app
 🌍 **Public URL:**
 
 ```
-http://18.207.118.178:5000
+http://18.207.118.178
+
 ```
 
 <img width="1893" height="866" alt="image" src="https://github.com/user-attachments/assets/dab5bc37-cca1-44fb-809c-1b06ea3487c0" />
